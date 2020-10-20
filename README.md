@@ -623,6 +623,12 @@ return new OkObjectResult("{[]}");
 
 * Download a solution files from [GitHub](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git). Then open the solution file RdpAzureFunctions.sln on Visual Studio 2019. Or you can open folder you download from GitHub on Visual Studio Code.
 
+* Open RdpFunctions.cs and modify RedisConnString from the below line to your Redis Cache connection string you created on Azure.
+
+```c#
+   private const string RedisConnString="<Redis Connection String>";
+```
+
 * Go to folder RdpAzureFunctions and then start Debug or Release on Visual Studio 2019 or Visual Studio code. You can also launch New Terminal under Visual Studio Code and then type command __func start__ under folder RdpAzureFunctions. It will start a server and show the below console output with a list of HTTP endpoints you can run on the browser or use an HTTP client test tool, such as a Soap UI to test.
 
 ![runconsole](images/run_serverless_functions.png)
@@ -694,6 +700,8 @@ It will show the following result.
 ![vodasearch](images/searchid.png)
 
 You can try different search types and queries to find more specific data. You may add your own function to get other data like ESG basic score from  ESG endpoints so you can understand more about RDP API usage.
+
+Pleae note that in this article we will not talk about Azure serverless function deployment. You can find additional details from [Azure Document](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies).
 
 ## Summary
 
