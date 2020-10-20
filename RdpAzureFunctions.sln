@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdpAzureFunctions", "RdpAzureFunctions\RdpAzureFunctions.csproj", "{8DF82E04-5DA6-4445-B457-AF9655D49ADD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rdp_api_lib", "rdp_api_lib\rdp_api_lib.csproj", "{6E20B797-BD1F-4DBF-ADAF-8940FE7A1CBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8DF82E04-5DA6-4445-B457-AF9655D49ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DF82E04-5DA6-4445-B457-AF9655D49ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DF82E04-5DA6-4445-B457-AF9655D49ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DF82E04-5DA6-4445-B457-AF9655D49ADD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E20B797-BD1F-4DBF-ADAF-8940FE7A1CBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E20B797-BD1F-4DBF-ADAF-8940FE7A1CBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E20B797-BD1F-4DBF-ADAF-8940FE7A1CBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E20B797-BD1F-4DBF-ADAF-8940FE7A1CBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D23F800-FD2C-43DF-A943-E66D21BDFBB0}
+	EndGlobalSection
+EndGlobal
