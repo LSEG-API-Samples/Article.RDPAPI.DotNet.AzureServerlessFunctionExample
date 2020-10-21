@@ -4,7 +4,7 @@ There are questions from users who currently develop and deploy their applicatio
 
 ## Serverless Architecture overview
 
-Serverless architectures is an increasingly popular approach to application development. If you are not familiar with the terms serverless function and serverless architecture, let talk about the concept in the next topics.
+Serverless architectures is an increasingly popular approach to application development. The following is a brief summary concept of the serverless function and serverless architecture
 
 __Serverless Architecture__ (also known as serverless computing or function as a service, FaaS) are application designs that incorporate third-party "Backend as a Service" (BaaS) services and that include custom code run in managed, ephemeral containers on the FaaS platform. Using these ideas, and related ones like single-page applications, such architectures remove much of the need for a traditional always-on server component. Serverless architectures may benefit from significantly reduced operational cost, complexity, and engineering lead time, at the expense of increased reliance on vendor dependencies and comparatively immature supporting services[1].
 
@@ -26,7 +26,7 @@ The following picture is a sample of architecture overview of how the Azure serv
 
 ![azure serverless](images/azurefunction1.png)
 
-In this sample, we create Azure serverless Function with an HTTP trigger, so the client app, such as Web client, which hosted on Azure app service and applications that hosted on a virtual machine running on the same region, can send HTTP requests to trigger the function and then process the HTTP response message to reduce overhead and data usage on the cloud. We may create Redis Server(which is an in-memory data structure store) on Azure to cache the ESG universe data, and then other functions can write or read the data from the Cache to perform the Search and generate a Report, etc. You can configure the function to trigger another serverless function, perform other tasks, or set the output to other components such as the database. It depends on your requirement.
+In this sample, we create Azure serverless Function with an HTTP trigger, so the client app, such as Web client, which hosted on Azure app service and applications that hosted on a virtual machine running on the same region, can send HTTP requests to trigger the function and then process the HTTP response message. We can create Redis Cache(which is an in-memory data structure store) on Azure to cache the ESG universe data, and then other functions can write or read the data from the Cache to perform the Search and generate a Report, etc. You can configure the function to trigger another serverless function, perform other tasks, or set the output to other components such as the database. It depends on your requirement.
 
 ## RDP API usage
 
@@ -645,15 +645,31 @@ Below is the sample output on the Chrome browser.
 
 You need to copy the value of access_token,token_type from the JSON response message and use it in the next function. Note that the access token has a short life of around 300 sec. Once it expired, you have to call the GetNewToken function again and pass the same user name and password. The alternative way is to use the refresh token from the response message you received previously. Pass it the function by using query parameters _refreshtoken=\<refreshtoken\>&userefreshtoken=true_ and remove the password from the HTTP get. Below is a sample function call. The result will be the same as the above sample.
 
-```c#
+```url
 http://localhost:7071/api/GetNewToken?username=<RDP Username>&refreshtoken=<refresh token>&appid=<AppKey or Client Id>&userefreshtoken=true
+```
+
+If you wish to send HTTP Post to the function. You need to compose the request content in JSON message like below sample.
+
+```json
+{
+    "username":"<RDP Username>",
+    "password":"<RDP Password>",
+    "appid":"<client id or appkey>"
+}
+```
+
+And send it to
+
+```url
+http://localhost:7071/api/GetNewToken
 ```
 
 * Call GetEsgUniverse to retreive ESG data.
 
 To retrieve ESG data, simply copy the following URL to the browser. Please replaced \<Access Token\> with the token from the previous step. Note that this sample will not cache data on Redis Cache. It just returns the JSON message contains all universe list.
 
-```c#
+```url
 http://localhost:7071/api/GetESGUniverse?tokentype=Bearer&token=<Acccess Token>
 ```
 
@@ -663,7 +679,7 @@ Sample output
 
 If you wish to cache data on Redis Cache, please add _updatecache=true&username=\<RDP Username or Machine Id\>_ to the query parameters.
 
-```c#
+```url
 http://http://localhost:7071/api/GetESGUniverse?tokentype=Bearer&updatecache=true&username=<RDP Username or Machine Id>&token=<Access Token>
 ```
 
@@ -683,7 +699,7 @@ You can call <http://localhost:7071/api/SearchUniverse> with the following query
 
 Below is the sample result for search by common name by using the query "Voda".
 
-```c#
+```url
 http://localhost:7071/api/SearchUniverse?username=<username>&type=name&query=Voda
 ```
 
@@ -691,7 +707,7 @@ http://localhost:7071/api/SearchUniverse?username=<username>&type=name&query=Vod
 
 Suppose we have PermId 4295907168, which is for Microsoft, and we want to know Ric and Common name. We can use the following query to query the data.
 
-```c#
+```url
 http://localhost:7071/api/SearchUniverse?username=<RDP User>type=permid&query=4295907168
 ```
 
