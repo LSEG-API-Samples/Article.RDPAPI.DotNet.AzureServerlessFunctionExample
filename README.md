@@ -32,7 +32,7 @@ In this sample, we create Azure serverless Function with an HTTP trigger, so the
 
 In this article, we will create an Azure serverless function to retrieve ESG universe data from RDP. We need to create a wrapper class on top of RDP API. Then we can use it in our serverless function. Below is a list of functions we need for our class.
 
-1) The first one is a function that works just like an authentication proxy to get OAuth2 access token from RDP Authentication services and return the data in JSON format to the client app. It can share this function with any application that wants to get an access token from RDP.
+1) The first one is a function that works like a proxy to get OAuth2 access token from RDP Authentication services and return the JSON format to the client app. It can share this function with any application that wants to get an access token from RDP.
 
 2) The second one is the function for retrieve ESG universe data from the ESG service. The API call is time-consuming and consumes much bandwidth. This function is quite useful when the client app wants to search a Ric or PermId that is supported on ESG. It can share the data with other applications to perform tasks like generating reports etc. The application may call the serverless function just once and then write the list to Redis Cache. We can also add a serverless function to read universe data from cached data to perform other tasks.
 
@@ -40,7 +40,7 @@ We will create a .NET Standard wrapper class for these functions so we can re-us
 
 ### Create a function to get RDP OAuth2 Access Token
 
-First of all, you need to know the HTTP endpoint and HTTP request headers you need to send to the endpoint. Please refer to information from [this article](https://developers.refinitiv.com/en/article-catalog/article/oauth-grant-types-in-refinitiv-data-platform) and find more details from the quickstart and tutorial [page](https://developers.refinitiv.com/en/api-catalog/refinitiv-data-platform/refinitiv-data-platform-apis/quick-start) to set up the HTTP request headers and contents.
+First of all, you need to know the HTTP endpoint and HTTP request headers that the application needs to send. You can find more details about OAuth grant types in the Refinitiv Data Platform from [this article](https://developers.refinitiv.com/en/article-catalog/article/oauth-grant-types-in-refinitiv-data-platform), and you can find the guideline to set up HTTP Request message to get a token from this [tutorial page](https://developers.refinitiv.com/en/api-catalog/refinitiv-data-platform/refinitiv-data-platform-apis/quick-start).
 
 Our function will process the HTTP response message from the RDP server and then re-generate an output to below JSON format.
 
@@ -75,7 +75,7 @@ Our function will process the HTTP response message from the RDP server and then
 
 The function will use the IHttpClientFactory interface, which can configure and create HttpClient instances in an app through Dependency Injection (DI). It also provides extensions for Polly-based middleware to take advantage of delegating handlers in HttpClient. You can find more details about the interface from [online document](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests).
 
-Below is a snippet of codes from the functions. You can find full source files from [Github](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git). It's source codes from RdpManager.cs provided under __rdp_api_lib__ folder.
+Below is a snippet of codes from the functions. You can find full source files from [Github](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git). It's source codes from RdpManager.cs provided under [__rdp_api_lib__](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample/tree/main/rdp_api_lib) folder. Please note that for demonstration purposes, this function was created to support two options. The first option is to use the function to get a new access token from the token endpoint using a password. Each time you call the function to get a new token, we will set __takeExclusiveSignOnControl__ to true in the request body to terminate the old session. The second option is to use the function to get an access token using a refresh token instead of a user password. You can design your workflow to share the request token to another app or process, for example, save it to Redis Cache, and then the other app that sharing the same user can access the refresh token and use it to get Access Token instead of passing a password.
 
 * The main interface for GetToken function.
 
@@ -284,7 +284,7 @@ Process ESG response message and parse the data to create a RdpEsgResponse objec
     }
 ```
 
-If an error occurs on ESG Services, the application needs to parse the error from the JSON message and return the JSON message created from RdpESGResponse class instead.
+If an error occurs on ESG Services, the application needs to parse the JSON message's error and return the JSON message created from RdpESGResponse class instead.
 
 ```c#
     var rdpEsgErrorResponse = new RdpEsgError();
@@ -305,7 +305,7 @@ Basically, Azure provides several Function Templates to support various types of
 
 You can try to create the function yourself. Please follow the instruction from the following [online document](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-your-first-function-visual-studio) from Microsoft website to install Azure development tool or SDK and then create a function using [Visual Studio 2019](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-your-first-function-visual-studio) or [Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp).
 
-Visual Studio 2019.
+On Visual Studio 2019.
 
 * Select project template Azure Functions
 
@@ -315,9 +315,9 @@ Visual Studio 2019.
 
 ![CreateHttpTriggerFunction](/images/createazurefunction.png)
 
-Visual Studio Code
+On Visual Studio Code.
 
-![VSCode](https://docs.microsoft.com/en-us/azure/azure-functions/media/functions-create-first-function-vs-code/create-new-project.png)
+![VSCode](images/create-new-project.png)
 
 After following the document to create a project,  Visual Studio will automatically create a function named httpexample. But in this project, we will use dependency injection, so we need to follow the following [guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-dotnet-dependency-injection) to install addition library from Nuget and then add FunctionsStartup to the project. We will add HTTP Client to the Startup service to pass it to our wrapper class and functions we created earlier.
 
@@ -356,9 +356,9 @@ public class RdpHttpTrigger
 }
 ```
 
-### Create serverless function to get access token
+### Create a serverless function to get access token
 
-In this step, we will add a reference to the wrapper class project we talk about earlier. We will add IRdpAuthorizeService to RdpHttpTrigger. And then pass the HTTP client to the constructor of this class. The instance of IRdpAuthroizeService will utilize the HTTP client from the HTTP Client Factory we have created.  Please refer to a full source files from RdpFunctions.cs provided under [RdpAzureFunctions](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git) project .
+In this step, we will add a reference to the wrapper class project we talk about earlier. We will add IRdpAuthorizeService to RdpHttpTrigger. And then pass the HTTP client to the constructor of this class. The instance of IRdpAuthroizeService will utilize the HTTP client from the HTTP Client Factory we have created. Please refer to the full source files from RdpFunctions.cs provided under the [RdpAzureFunctions](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample/tree/main/RdpAzureFunctions) project.
 
 ```c#
 private readonly IHttpClientFactory _client;
@@ -386,6 +386,7 @@ Below are sample codes from the GetNewToken functions.
             var appId = string.Empty;
             var useRefreshToken = "false";
             var refreshToken = string.Empty;
+
             if (req.Method.ToLower() == "get")
             {
                 username = req.Query["username"];
@@ -397,27 +398,25 @@ Below are sample codes from the GetNewToken functions.
             else if (req.Method.ToLower() == "post")
             {
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                dynamic data = JsonConvert.DeserializeObject(requestBody);
-                username ??= data?.username;
-                password ??= data?.password;
-                appId ??= data?.appid;
-                useRefreshToken ??= data?.userefreshtoken;
-                refreshToken ??= data?.userefreshtoken;
+                dynamic data = JObject.Parse(requestBody);
+                username = data.username;
+                password = data.password;
+                appId = data.appid;
+                useRefreshToken = data.userefreshtoken;
+                refreshToken = data.refreshtoken;
             }
 
-            if (!string.IsNullOrEmpty(useRefreshToken) && useRefreshToken.ToLower().Contains("true"))
-                useRefreshToken = "true";
-            else
+            if (string.IsNullOrEmpty(useRefreshToken))
                 useRefreshToken = "false";
 
             if (string.IsNullOrEmpty(refreshToken))
                 refreshToken = string.Empty;
 
             var response = await _authService.GetToken(username, password, appId,"trapi",refreshToken,Convert.ToBoolean(useRefreshToken));
-
             if (response.IsSuccess)
             {
                 var tokenData = response as RdpTokenResponse;
+
                 return new JsonResult(JsonConvert.SerializeObject(tokenData));
             }
 
@@ -448,7 +447,7 @@ You can copy the GetNewToken URL and test it on a web browser like the following
 
 ![runauthenfail](/images/runauthen.png)
 
-### Add function to get ESG universe
+### Add function to get the ESG universe
 
 Like previous functions, we will add IEsgService, which provides a method to get the class's ESG universe.
 
@@ -473,35 +472,32 @@ public async Task<IActionResult> GetESGUniverse(
     HttpRequest req,
     ILogger log)
 {
-    var token = string.Empty;
-    var tokenType = string.Empty;
-    var updatecache = string.Empty;
-    if (req.Method.ToLower() == "get")
-    {
-        token = req.Query["token"];
-        tokenType = req.Query["tokentype"];
-    }
-    else if (req.Method.ToLower() == "post")
-    {
-        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
-        token ??= data?.token;
-        tokenType ??= data?.tokentype;
-    }
+        var token = string.Empty;
+        var tokenType = string.Empty;
 
-    var response = await _esgService.GetEsgUniverse(token, tokenType);
+        if (req.Method.ToLower() == "get")
+        {
+            token = req.Query["token"];
+            tokenType = req.Query["tokentype"];
+        }
+        else if (req.Method.ToLower() == "post")
+        {
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JObject.Parse(requestBody);
+            token = data.token;
+            tokenType = data.tokentype;
+        }
+        tokenType ??= "Bearer";
 
-    // If the operions is successful, get RdpEsgResponse and return it to client.
-    if (response.IsSuccess)
-    {
+        var response = await _esgService.GetEsgUniverse(token, tokenType);
+        if (response.IsSuccess)
+        {
+            var esgCache = response as RdpEsgResponse;
+            return new JsonResult(JsonConvert.SerializeObject(esgCache));
+        }
 
-        var esgCache = response as RdpEsgResponse;
-        return new JsonResult(JsonConvert.SerializeObject(esgCache));
-    }
-
-    // If opertion return an errors, return RdpEsgError instead.
-    var errorData = response as RdpEsgError;
-    return new JsonResult(JsonConvert.SerializeObject(errorData));
+        var errorData = response as RdpEsgError;
+        return new JsonResult(JsonConvert.SerializeObject(errorData));
 }
 ```
 
@@ -526,44 +522,58 @@ var token = string.Empty;
 var tokenType = string.Empty;
 var updatecache = string.Empty;
 var username = string.Empty;
+var returnContent = string.Empty;
 if (req.Method.ToLower() == "get")
 {
     token = req.Query["token"];
     tokenType = req.Query["tokentype"];
     updatecache = req.Query["updatecache"];
     username = req.Query["username"];
+    returnContent = req.Query["showuniverse"];
 }
 else if (req.Method.ToLower() == "post")
 {
     var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-    dynamic data = JsonConvert.DeserializeObject(requestBody);
-    token ??= data?.token;
-    tokenType ??= data?.tokentype;
-    updatecache ??= data?.updatecache;
-    username ??= data?.username;
+    dynamic data = JObject.Parse(requestBody);
+    token = data.token;
+    tokenType = data.tokentype;
+    updatecache = data.updatecache;
+    username = data.username;
+    returnContent = data.showuniverse;
 }
+    tokenType ??= "Bearer";
+    updatecache ??= "false";
+    returnContent ??= "true";
 ```
 
-Then we will add the below codes to write the data from the response message to Redis. Note that we need to Serialize the object to JSON string to save it to the cache. Then we can read the JSON string and deserialize it to an object. RedisConnString is a connection string we defined in the class earlier.
+Then we will update the codes to write the data from the response message to Redis. Note that we need to Serialize the object to JSON string to save it to the cache. Then we can read the JSON string and deserialize it to an object. RedisConnString is a connection string we defined in the class earlier.
 
 ```c#
- var esgCache = response as RdpEsgResponse;
+var esgCache = response as RdpEsgResponse;
 
 if (!string.IsNullOrEmpty(updatecache) && !string.IsNullOrEmpty(username) && updatecache.Contains("true"))
 {
+    var cache = (await ConnectionMultiplexer.ConnectAsync(RedisConnString)).GetDatabase();
     var jsonObj = new
     {
         EsgUniverseCount = esgCache.Count,
         EsgUniverseHeader = esgCache?.UniverseHeaderMetas,
         EsgUniverse = esgCache?.UniverseData,
     };
-    var cache = (await ConnectionMultiplexer.ConnectAsync(RedisConnString)).GetDatabase();
+
     cache.StringSet(username, JsonConvert.SerializeObject(jsonObj));
 
 }
+if (returnContent.Contains("false"))
+{
+    esgCache.UniverseData = new List<EsgUniverseData>();
+    esgCache.UniverseHeaderMetas = new List<EsgUniverseHeaderMeta>();
+}
 ```
 
-### Add function to search ESG universe
+You can find a full source files of the implementation from project [RdpAzureFunctions](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample/tree/main/RdpAzureFunctions).
+
+### Add function to search the ESG universe
 
 Next step, I will create a serverless function named SearchUniverse to read ESG Universe data from Redis Cache and use a normal lambda expression to search data based on query parameters.
 
@@ -581,9 +591,9 @@ Next step, I will create a serverless function named SearchUniverse to read ESG 
 
 We add methods GetDataByPermID, GetDataByRic, GetDataByCommonName and GetData to our wrapper class. I will omit the codes here to make it short. You can find the implementation in the full source files. Then we will call it in the serverless function based on query parameters from HTTP GET. The user has to pass the following parameter with HTTP GET.
 
-* __username__ is a username to get data from Redis.
-* __query__ is a case sensitive search keyword. ,
-* __type__ Valid value can be "any", "permit", "Eric" , and "name".
+> * __username__ is a username to get data from Redis.
+> * __query__ is a case sensitive search keyword. ,
+> * __type__ Valid value can be "any", "permit", "Eric" , and "name".
 
 It will return a blank list when the query does not match or invalid.
 
@@ -621,7 +631,7 @@ return new OkObjectResult("{[]}");
 
 ## Build and Test the serverless functions
 
-* Download a solution files from [GitHub](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git). Then open the solution file RdpAzureFunctions.sln on Visual Studio 2019. Or you can open folder you download from GitHub on Visual Studio Code.
+* Download a solution files from [GitHub](https://github.com/Refinitiv-API-Samples/Article.RDPAPI.DotNet.AzureServerlessFunctionExample.git). Then open the solution file RdpAzureFunctions.sln on Visual Studio 2019. Or you can open the folder you download from GitHub on Visual Studio Code.
 
 * Open RdpFunctions.cs and modify RedisConnString from the below line to your Redis Cache connection string you created on Azure.
 
@@ -649,7 +659,7 @@ You need to copy the value of access_token,token_type from the JSON response mes
 http://localhost:7071/api/GetNewToken?username=<RDP Username>&refreshtoken=<refresh token>&appid=<AppKey or Client Id>&userefreshtoken=true
 ```
 
-If you wish to send HTTP Post to the function. You need to compose the request content in JSON message like below sample.
+Suppose you wish to send HTTP Post to the function. You need to compose the requested content in the JSON message like the below sample.
 
 ```json
 {
@@ -667,7 +677,7 @@ http://localhost:7071/api/GetNewToken
 
 * Call GetEsgUniverse to retreive ESG data.
 
-To retrieve ESG data, simply copy the following URL to the browser. Please replaced \<Access Token\> with the token from the previous step. Note that this sample will not cache data on Redis Cache. It just returns the JSON message contains all universe list.
+To retrieve ESG data, copy the following URL to the browser. Please replaced \<Access Token\> with the token from the previous step. Note that this sample will not cache data on Redis Cache. It just returns the JSON message contains all universe list.
 
 ```url
 http://localhost:7071/api/GetESGUniverse?tokentype=Bearer&token=<Acccess Token>
@@ -685,19 +695,17 @@ http://http://localhost:7071/api/GetESGUniverse?tokentype=Bearer&updatecache=tru
 
 It will return the same result and write the data to Redis Cache using your username as a key.
 
-* Call SearchUniverse function to search ESG data from Redis Cache.
+* Call SearchUniverse function to search ESG data from Redis Cache. You need to send HTTP GET request to http://localhost:7071/api/SearchUniverse and pass the following query parameters to the serverless function.
 
-You can call <http://localhost:7071/api/SearchUniverse> with the following query parameters.
+> * __query__ is a keyword you want to search.
+> * __username__ is your username to retrieve data >from the cache.
+> * __type__ is search type, and it must be one of >the following values. If not set, it will use "any".
+>   1) "any" to search query from value of any fields.
+>   2) "permid" to search query from the value of Perm Id.
+>   3) "ric" to the search query from Ric's name.
+>   4) "name" to search query from the common name.
 
-* __query__ is a keyword you want to search.
-* __username__ is your username to retrieve data from the cache.
-* __type__ is search type, and it must be one of the following values. If not set, it will use "any".
-  1) "any" to search query with any fields.
-  2) "permid" to search query with the value of Perm Id.
-  3) "ric" to search query with Ric name.
-  4) "name" to search query with the Common Name.
-
-Below is the sample result for search by common name by using the query "Voda".
+Below is the sample result for search by name(common name) using the keyword "Voda".
 
 ```url
 http://localhost:7071/api/SearchUniverse?username=<username>&type=name&query=Voda
@@ -715,13 +723,13 @@ It will show the following result.
 
 ![vodasearch](images/searchid.png)
 
-You can try different search types and queries to find more specific data. You may add your own function to get other data like ESG basic score from  ESG endpoints so you can understand more about RDP API usage.
+You can try different search types and queries to find more specific data. You may add your own function to get other data like ESG basic score from ESG endpoints so you can understand more about RDP API usage.
 
-Pleae note that in this article we will not talk about Azure serverless function deployment. You can find additional details from [Azure Document](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies).
+Please note that in this article, we will not talk about Azure serverless function deployment. You can find additional details from [Azure Document](https://docs.microsoft.com/en-us/azure/azure-functions/functions-deployment-technologies).
 
 ## Summary
 
-In this article, we have explained the basic concepts of the Serverless Architecture and Azure serverless function. We also provide a sample .NET Core serverless function to demonstrate a basic workflow to get Access Token from RDP. Then the user can then use the access token to retrieve ESG universe data using the RDP ESG universe API. The serverless function we create in this article is a normal function with the HTTP Trigger type, so it should be a simple sample app for a user who wants to start using RDP API to create a serverless function on Azure. After you understand a concept, you should design your app and utilize the Azure function to get any other data from the Refinitiv Data Platform.
+In this article, we have explained the basic concepts of the Serverless Architecture and Azure serverless function. We also provide a sample .NET Core serverless function to demonstrate a basic workflow to get Access Token from RDP. The user can then use the access token to retrieve ESG universe data using the RDP ESG universe API. The serverless function we create in this article is a normal function with the HTTP Trigger type, so it should be a simple sample app for a user who wants to start using RDP API to create a serverless function on Azure. After you understand a concept, you should design your app and utilize the Azure function to get any other data from the Refinitiv Data Platform.
 
 ## References
 
