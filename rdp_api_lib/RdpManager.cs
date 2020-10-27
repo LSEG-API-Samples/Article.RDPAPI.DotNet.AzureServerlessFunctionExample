@@ -17,6 +17,9 @@ namespace rdp_api_lib
         string HttpResponseStatusText { get; set; }
 
     }
+    /// <summary>
+    /// RdpAuthenticationError represent error message from Authentication Service. 
+    /// </summary>
     public class RdpAuthenticationError: IRdpResponseMessage
     {
         [Newtonsoft.Json.JsonProperty("error", DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -46,6 +49,9 @@ namespace rdp_api_lib
             return dumpText.ToString();
         }
     }
+    /// <summary>
+    /// RdpTokenResponse represents Eroror message from RDP server and HTTP response. The function will return this class when it found some error.
+    /// </summary>
     public class RdpTokenResponse: IRdpResponseMessage
     {
         [Newtonsoft.Json.JsonProperty("access_token", DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -105,7 +111,19 @@ namespace rdp_api_lib
         {
             _clientFactory = clientFactory;
         }
-
+        /// <summary>
+        /// GetToken was design to get Access Token from RDP Token endpoint.Currently it will set takeExclusiveSignOnControl = true by default.
+        /// Once you call this function, the old session will be closed/invalid.
+        /// </summary>
+        /// <param name="username">RDP Username or ClientId</param>
+        /// <param name="password">RDP password</param>
+        /// <param name="client_id">Client Id or AppKey</param>
+        /// <param name="scope">Scope, default is trapi</param>
+        /// <param name="refreshToken">Refresh Token. User can use Refresh token to get a new Access Token rather than using password.
+        /// Once Refresh Token is expired, user has to use password to get a new Access Token and Refrsh Token instead.</param>
+        /// <param name="useRefreshToken">true/false. Client has to set to true if they wish to use refreshtoken.</param>
+        /// <param name="redirectUrl">The new url to get the token</param>
+        /// <returns></returns>
         public async Task<IRdpResponseMessage> GetToken(string username, string password, string client_id,string scope="trapi",string refreshToken = null,
             bool useRefreshToken = false, string redirectUrl= null)
         {
@@ -163,8 +181,6 @@ namespace rdp_api_lib
                 return rdpTokenResult;
             }
 
-           
-          
             switch (response.StatusCode)
             {
                 case HttpStatusCode.Moved: // 301

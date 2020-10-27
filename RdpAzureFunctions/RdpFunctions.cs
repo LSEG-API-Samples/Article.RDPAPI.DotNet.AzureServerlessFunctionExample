@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 using rdp_api_lib;
 using StackExchange.Redis;
 
-namespace RdpFunctions
+namespace RdpAzureFunctions
 {
     public class RdpHttpTrigger
     {
@@ -163,6 +163,8 @@ namespace RdpFunctions
         /// username: RDP username or Machine Id
         /// password: RDP password
         /// appkey: RDP client id or appkey</param>
+        /// refreshtoken: Refresh Token to get a new Access Token
+        /// userefreshtoken: true/false. You need to pass it with the query parameters to tell the function to use refreshtoken to get a new access token instead.
         /// <param name="log"></param>
         /// <returns>Response Message from RDP Token service with addtional info from HTTP response message in JSON format</returns>
         [FunctionName("GetNewToken")]

@@ -14,6 +14,9 @@ using rdp_api_lib;
 
 namespace rdp_api_lib
 {
+    /// <summary>
+    /// ESG Error class to show error info from ESG service.
+    /// </summary>
     public class ESGError
     {
         public string InvalidName { get; set; }
@@ -22,6 +25,10 @@ namespace rdp_api_lib
         public string Name { get; set; }
         public string Value { get; set; }
     }
+    /// <summary>
+    /// RDEsgError class. The main function will return data inside this class to client.
+    /// It contains both HTTP status codes and ESG error if it has some issue with the request.
+    /// </summary>
     public class RdpEsgError : IRdpResponseMessage
     {
         public HttpStatusCode HttpResponseStatusCode { get; set; }
@@ -44,7 +51,9 @@ namespace rdp_api_lib
             NullValueHandling = Newtonsoft.Json.NullValueHandling.Include)]
         public string Status { get; set; }
     }
-
+    /// <summary>
+    /// This class represent ESG Meta data for the headers column.
+    /// </summary>
     public class EsgUniverseHeaderMeta
     {
         [Newtonsoft.Json.JsonProperty("name", DefaultValueHandling = DefaultValueHandling.Ignore,
@@ -60,13 +69,21 @@ namespace rdp_api_lib
             NullValueHandling = Newtonsoft.Json.NullValueHandling.Include)]
         public string Description { get; set; }
     }
-
+    /// <summary>
+    /// EsgUnivesreData represent content of ESG Universe response.
+    /// ESG universe function will provide a list of instance of this class.
+    /// </summary>
     public class EsgUniverseData
     {
         public string PermId { get; set; }
         public string PrimaryRic { get; set; }
         public string CommonName { get; set; }
     }
+
+    /// <summary>
+    /// This class will be used when the request is success and has no error.
+    /// It will return this class instead of the RdpEsgError.
+    /// </summary>
     public class RdpEsgResponse : IRdpResponseMessage
     {
         public HttpStatusCode HttpResponseStatusCode { get; set; }
@@ -100,6 +117,13 @@ namespace rdp_api_lib
         {
             _clientFactory = clientFactory;
         }
+        /// <summary>
+        /// Get EsgUniverse function used to retrieve ESG universe data.
+        /// </summary>
+        /// <param name="requestToken"> is valid RDP access token </param>
+        /// <param name="tokenType"> is type of RDP access token. Default is Bearer.</param>
+        /// <param name="redirectUrl">The server may reponse with new redirectUrl. Internal function will detect and use the new URL instead.</param>
+        /// <returns></returns>
         public async Task<IRdpResponseMessage> GetEsgUniverse(string requestToken, string tokenType="Bearer", string redirectUrl = null)
         {
             var tokenUri = new UriBuilder()
@@ -176,25 +200,50 @@ namespace rdp_api_lib
         }
     }
 
-
+    /// <summary>
+    /// Utility class provide functions to search data from ESG Universe data according type of query user want to use.It could be PermId,CommonName and RIC name.
+    /// </summary>
     public class EsgUniverseCache 
     {
-
+        /// <summary>
+        /// Search By using PermId
+        /// </summary>
+        /// <param name="permId">Keyword to search the PermId</param>
+        /// <param name="esgData">EsgData which is a List of EsgUniverseData</param>
+        /// <returns></returns>
         public static IEnumerable<EsgUniverseData> GetDataByPermId(string permId, IList<EsgUniverseData> esgData)
         {
             return esgData.Where(data => (!string.IsNullOrEmpty(data.PermId) && data.PermId.Contains(permId)));
             
         }
-
+        /// <summary>
+        /// Search by ESG Universe Ric name 
+        /// </summary>
+        /// <param name="ricName">Keyword to search RIC name</param>
+        /// <param name="esgData">EsgData which is a List of EsgUniverseData</param>
+        /// <returns></returns>
         public static IEnumerable<EsgUniverseData> GetDataByRic(string ricName,IList<EsgUniverseData> esgData)
         {
             return  esgData.Where(data => (!string.IsNullOrEmpty(data.PrimaryRic) && data.PrimaryRic.Contains(ricName)));
        
         }
+        /// <summary>
+        /// Search ESG data by using common name
+        /// </summary>
+        /// <param name="commonName">Keyword to search the common name</param>
+        /// <param name="esgData">EsgData which is a List of EsgUniverseData</param>
+        /// <returns></returns>
         public static IEnumerable<EsgUniverseData> GetDataByCommonName(string commonName, IList<EsgUniverseData> esgData)
         {
             return esgData.Where(data => (!string.IsNullOrEmpty(data.CommonName) && data.CommonName.Contains(commonName)));
         }
+        /// <summary>
+        /// Search ESG universe by using all fields that are PermId,Common Name and RIC name.
+        /// Currently it just use all three method implemented previously to get the data and then merge the result before return it to user.
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <param name="esgData">EsgData which is a List of EsgUniverseData</param>
+        /// <returns></returns>
         public static IEnumerable<EsgUniverseData> GetData(string keyword, IList<EsgUniverseData> esgData)
         {
             var list = new List<EsgUniverseData>();
