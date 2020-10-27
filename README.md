@@ -675,6 +675,17 @@ And send it to
 http://localhost:7071/api/GetNewToken
 ```
 
+If you want to use a refresh token to get a new Access Token, you can send HTTP Post with the below JSON request message.
+
+```json
+{
+    "username":"<RDP Username>",
+    "refreshtoken":"<RDP Refresh Token>",
+    "appid":"<client id or appkey>",
+    "userefreshtoken":"true"
+}
+```
+
 * Call GetEsgUniverse to retreive ESG data.
 
 To retrieve ESG data, copy the following URL to the browser. Please replaced \<Access Token\> with the token from the previous step. Note that this sample will not cache data on Redis Cache. It just returns the JSON message contains all universe list.
